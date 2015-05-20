@@ -1,5 +1,6 @@
 
 import flask
+import os
 
 from . import constants
 from . import flask_app
@@ -27,5 +28,22 @@ def edit():
         graph.generate_svg(
             flask_app.config[constants.DOTFILE],
             flask_app.config[constants.SVG])
-        return flask.redirect('/index')
+        return flask.redirect('/view')
     return flask.render_template('edit.html', form=form)
+
+
+@flask_app.route('/view')
+def view():
+    return flask.render_template('view.html')
+
+@flask_app.route('/orgchart.dot')
+def dot():
+    return flask.send_file(os.path.join(
+        os.pardir,
+        flask_app.config[constants.DOTFILE]))
+
+@flask_app.route('/orgchart.svg')
+def svg():
+    return flask.send_file(os.path.join(
+        os.pardir,
+        flask_app.config[constants.SVG]))
