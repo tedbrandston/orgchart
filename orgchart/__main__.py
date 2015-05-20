@@ -8,24 +8,12 @@ from orgchart import constants
 from orgchart import graph
 
 
-def set_defaults(config):
-    """Fill in some reasonable defaults for config values"""
-    defaults = [
-        (constants.DOTFILE, 'orgchart.dot'),
-        (constants.SVG, 'orgchart.svg'),
-    ]
-    for k, v in defaults:
-        config.setdefault(k, v)
-
-
 def parse_args(args, config):
     """Parse overrides to the config.
 
-    Default to existing config values, store parsed
-    overrides back in the config.
+    Stores parsed overrides back in the config, and
+    returns the parsed args argparse namespace object.
     """
-    set_defaults(config)
-
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
