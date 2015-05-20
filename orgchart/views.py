@@ -34,13 +34,20 @@ def edit():
 
 @flask_app.route('/view')
 def view():
-    return flask.render_template('view.html')
+    return flask.render_template(
+        'view.html',
+        jquery=flask_app.config[constants.JQUERY],
+        jquery_mousewheel=flask_app.config[constants.JQUERY_MOUSEWHEEL],
+        jquery_color=flask_app.config[constants.JQUERY_COLOR],
+        jquery_graphviz_svg=flask_app.config[constants.JQUERY_GRAPHVIZ_SVG])
+
 
 @flask_app.route('/orgchart.dot')
 def dot():
     return flask.send_file(os.path.join(
         os.pardir,
         flask_app.config[constants.DOTFILE]))
+
 
 @flask_app.route('/orgchart.svg')
 def svg():
