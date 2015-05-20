@@ -8,6 +8,8 @@ def load(dotfile):
     """Get a graph from a file, or a default graph if the file is missing"""
     if os.path.exists(dotfile):
         g = load_from_file(dotfile)
+        if g is None:
+            raise Exception('File not found: {}'.format(dotfile))
     else:
         g = pydot.Graph(graph_name='orgchart')
     return g
