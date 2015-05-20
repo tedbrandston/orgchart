@@ -6,7 +6,7 @@
     <h1>Edit:</h1>
     <form action="" method="post" name="edit">
       {{ form.hidden_tag() }}
-      <p>{{ form.test_data() }}</p>
+      <p>Person {{ form.node_a() }} is person {{ form.node_b() }}'s {{ form.edge() }}</p>
       <p><input type="submit" value="Submit"></p>
     </form>
   </body>

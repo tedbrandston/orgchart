@@ -18,6 +18,10 @@ def index():
 def edit():
     form = forms.Edit()
     if form.validate_on_submit():
+        flask_app.config[constants.GRAPH].add_edge(graph.pydot.Edge(
+            src=form.node_a.data,
+            dst=form.node_b.data,
+            label=form.edge.data))
         # I know, I probably shouldn't be writing to disk on every request,
         # it's not 'web scale', or even, perhaps, scalable to the < 10 people
         # I expect to use this at any given time. Probably I should push this

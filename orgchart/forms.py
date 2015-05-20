@@ -5,4 +5,6 @@ import wtforms
 
 class Edit(flask.ext.wtf.Form):
     """The form for editing the orgchart"""
-    test_data = wtforms.StringField('ignored')
+    node_a = wtforms.StringField()
+    node_b = wtforms.StringField()
+    edge = wtforms.StringField()
