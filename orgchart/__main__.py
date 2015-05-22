@@ -37,12 +37,10 @@ def parse_args(args, config):
 
 
 def main():
-    g = graph.load(flask_app.config[constants.DOTFILE])
-    flask_app.config[constants.GRAPH] = g
-
-    # Need a better place for this
-    if flask_app.config[constants.REVISION_DIR] is None:
-        raise Exception("No directory specified for revision control")
+    flask_app.config[constants.GRAPH] = graph.Graph(
+        flask_app.config[constants.DOTFILE],
+        flask_app.config[constants.SVG],
+        flask_app.config[constants.REVISION_DIR])
 
     return flask_app.run()
 

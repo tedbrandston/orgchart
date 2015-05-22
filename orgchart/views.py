@@ -26,12 +26,7 @@ def edit():
         # it's not 'web scale', or even, perhaps, scalable to the < 10 people
         # I expect to use this at any given time. Probably I should push this
         # into some queue in a different thread.
-        graph.save(
-            flask_app.config[constants.GRAPH],
-            flask_app.config[constants.DOTFILE],
-            flask_app.config[constants.SVG],
-            flask_app.config[constants.REVISION_DIR],
-            'no comment')
+        flask_app.config[constants.GRAPH].save('no comment')
         return flask.redirect('/view')
     return flask.render_template('edit.html', form=form)
 
