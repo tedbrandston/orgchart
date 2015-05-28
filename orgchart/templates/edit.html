@@ -3,11 +3,15 @@
     <title>Edit the orgchart</title>
   </head>
   <body>
-    <h1>Edit:</h1>
-    <form action="" method="post" name="edit">
+    <!-- Ideally, I'd have some kind of pretty, dynamic form here, but until then... -->
+    <h1>Make all of the following changes:</h1>
+    <form action="" method="post" name="add_person">
       {{ form.hidden_tag() }}
-      <p>Person {{ form.node_a() }} is person {{ form.node_b() }}'s {{ form.edge() }}</p>
-      <p><input type="submit" value="Submit"></p>
+      <p>Add a person named: {{ form.add_person() }}</p>
+      <p>Remove a person: {{ form.delete_person() }}</p>
+      <p>Add the tag {{ form.add_tag }} to {{ form.person_to_tag() }}</p>
+      <p>Remove the tag {{ form.remove_tag }} from {{ form.person_to_untag() }}</p>
+      <p><input type="submit" value="Apply changes"></p>
     </form>
   </body>
 </html>

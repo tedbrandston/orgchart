@@ -5,7 +5,6 @@ import os
 from . import constants
 from . import flask_app
 from . import forms
-from . import graph
 
 
 @flask_app.route('/')
@@ -16,17 +15,19 @@ def index():
 
 @flask_app.route('/edit', methods=['GET', 'POST'])
 def edit():
+    graph = flask_app.config[constants.GRAPH]
     form = forms.Edit()
+    form.set_person_choices(graph.list_people())
     if form.validate_on_submit():
-        flask_app.config[constants.GRAPH].add_edge(graph.pydot.Edge(
-            src=form.node_a.data,
-            dst=form.node_b.data,
-            label=form.edge.data))
+        graph.ensure_person_exists(form.add_person.data)
+        graph.delete_person(form.delete_person.data)
+        graph.tag_person(form.person_to_tag.data, form.add_tag.data)
+        graph.untag_person(form.person_to_untag.data, form.remove_tag.data)
         # I know, I probably shouldn't be writing to disk on every request,
         # it's not 'web scale', or even, perhaps, scalable to the < 10 people
         # I expect to use this at any given time. Probably I should push this
         # into some queue in a different thread.
-        flask_app.config[constants.GRAPH].save('no comment')
+        graph.save('no comment')
         return flask.redirect('/view')
     return flask.render_template('edit.html', form=form)
 
