@@ -125,6 +125,7 @@ class Graph():
     def delete_person(self, name):
         """Remove a person from the graph"""
         self._graph.del_node(name)
+        # TODO: delete all links to and from this person?
 
     def list_person_tags(self, name):
         """Return the list of tags on a person"""
@@ -147,6 +148,39 @@ class Graph():
             idx = tags.index(tag)
             tags = tags[:idx] + tags[idx+1:]
         self._set_person_tags(node, name, tags)
+
+    def link_people(self, name_src, name_dst, relationship):
+        """Add a link between two nodes"""
+        self.ensure_person_exists(name_src)
+        self.ensure_person_exists(name_dst)
+        self._graph.add_edge(pydot.Edge(
+            src=name_src,
+            dst=name_dst,
+            label=relationship))
+
+    def delete_link(self, name_src, name_dst, relationship):
+        """Remove a link between two nodes
+
+        If multiple links exist with the same relationship,
+        removes one of them.
+        """
+        # find the index of a link that matches relationship
+        edges = self._graph.get_edge(name_src, name_dst)
+        edges = filter(lambda e: e.get_label() == relationship, edges)
+        # If none match, it's probably because multiple
+        # people were editing at the same time
+        if len(edges) == 0:
+            return
+        # If there are multiple, I think it's fine to just delete the first
+        edge = edges[0]
+
+        self._graph.del_edge(edge)
+
+    def list_links_between(self, person_a, person_b):
+        """Return a list of all links between two nodes in either direction"""
+        # Do I need to make the entries unique? probably.
+        edges = self._graph.get_edge(person_a, person_b)
+        return [edge.get_label() for edge in edges]
 
     def reload(self):
         """Re-read graph from file, or make a new graph if file is missing"""

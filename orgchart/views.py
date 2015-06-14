@@ -23,6 +23,14 @@ def edit():
         graph.delete_person(form.delete_person.data)
         graph.tag_person(form.person_to_tag.data, form.add_tag.data)
         graph.untag_person(form.person_to_untag.data, form.remove_tag.data)
+        graph.link_people(
+            form.add_link_from.data,
+            form.add_link_to.data,
+            form.add_link.data)
+        graph.delete_link(
+            form.del_link_from.data,
+            form.del_link_to.data,
+            form.del_link.data)
         # I know, I probably shouldn't be writing to disk on every request,
         # it's not 'web scale', or even, perhaps, scalable to the < 10 people
         # I expect to use this at any given time. Probably I should push this

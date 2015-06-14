@@ -11,6 +11,8 @@
       <p>Remove a person: {{ form.delete_person() }}</p>
       <p>Add the tag {{ form.add_tag }} to {{ form.person_to_tag() }}</p>
       <p>Remove the tag {{ form.remove_tag }} from {{ form.person_to_untag() }}</p>
+      <p>Add a relationship: {{ form.add_link_from }} ---{{ form.add_link() }}--> {{ form.add_link_to }}</p>
+      <p>Remove a relationship: {{ form.del_link_from }} ---{{ form.del_link() }}--> {{ form.del_link_to }}</p>
       <p><input type="submit" value="Apply changes"></p>
     </form>
   </body>

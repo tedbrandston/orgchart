@@ -11,6 +11,12 @@ class Edit(flask.ext.wtf.Form):
     person_to_tag = wtforms.SelectField('Person')
     remove_tag = wtforms.StringField()
     person_to_untag = wtforms.SelectField('Person')
+    add_link_from = wtforms.SelectField('Person')
+    add_link_to = wtforms.SelectField('Person')
+    add_link = wtforms.StringField()
+    del_link_from = wtforms.SelectField('Person')
+    del_link_to = wtforms.SelectField('Person')
+    del_link = wtforms.StringField()
 
     def set_person_choices(self, people):
         """
@@ -24,3 +30,7 @@ class Edit(flask.ext.wtf.Form):
         self.delete_person.choices = pairs
         self.person_to_tag.choices = pairs
         self.person_to_untag.choices = pairs
+        self.add_link_from.choices = pairs
+        self.add_link_to.choices = pairs
+        self.del_link_from.choices = pairs
+        self.del_link_to.choices = pairs
