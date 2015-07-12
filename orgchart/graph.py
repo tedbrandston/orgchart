@@ -49,6 +49,9 @@ class Graph():
         is to avoid an interface that allows the creation of a node
         separate from the check for a pre-existing node.
         """
+        if not name:
+            # TODO: handle this some other way
+            return
         name = self._escape_name_or_tag(name)
         nodes = self._graph.get_node(name)
         if len(nodes) == 0:
@@ -73,7 +76,7 @@ class Graph():
         returns a pair of person name and list of tags on person
         """
         _person_label_regex = re.compile(
-            "\{\s*(?P<name>\w*)\s*\|\s*\{\s*(?P<tags>[\w\n]*)\s*\}\s*\}")
+            "\"\{\s*(?P<name>\w*)\s*\|\s*\{\s*(?P<tags>[\w\n]*)\s*\}\s*\}\"")
         # JIC
         label = label.strip()
         match = _person_label_regex.match(label)
@@ -228,3 +231,8 @@ class Graph():
         """Runs 'dot' to generate an svg"""
         subprocess.check_call(
             ['dot', '-Tsvg', self._dotfile, '-o' + self._svgfile])
+
+    def debug(self):
+        """"""
+        import pdb
+        pdb.set_trace()
