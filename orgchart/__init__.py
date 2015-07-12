@@ -7,6 +7,5 @@ flask_app.config.from_envvar('ORGCHART_FLASK_CONFIG')
 from . import constants
 constants.set_defaults(flask_app.config)
 
-from . import forms
 from . import graph
 from . import views

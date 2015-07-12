@@ -1,6 +1,6 @@
-* flesh out functions for mutating graph
+* Separate the name of node/name of person. I think it'll make validating input simpler, and let us do more in names
+* validate input
 * unit test?
-* improved editing ui
 * figure out concurrency
 * add better unicode support to dot_parser? emoji don't seem to work, and I think it's caused by dot_parser.
 * see TODOs in-code

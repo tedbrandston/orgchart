@@ -1,10 +1,12 @@
+from __future__ import print_function
 
 import flask
 import os
 
+from flask import request
+
 from . import constants
 from . import flask_app
-from . import forms
 
 
 @flask_app.route('/')
@@ -15,29 +17,28 @@ def index():
 
 @flask_app.route('/edit', methods=['GET', 'POST'])
 def edit():
-    graph = flask_app.config[constants.GRAPH]
-    form = forms.Edit()
-    form.set_person_choices(graph.list_people())
-    if form.validate_on_submit():
-        graph.ensure_person_exists(form.add_person.data)
-        graph.delete_person(form.delete_person.data)
-        graph.tag_person(form.person_to_tag.data, form.add_tag.data)
-        graph.untag_person(form.person_to_untag.data, form.remove_tag.data)
-        graph.link_people(
-            form.add_link_from.data,
-            form.add_link_to.data,
-            form.add_link.data)
-        graph.delete_link(
-            form.del_link_from.data,
-            form.del_link_to.data,
-            form.del_link.data)
-        # I know, I probably shouldn't be writing to disk on every request,
-        # it's not 'web scale', or even, perhaps, scalable to the < 10 people
-        # I expect to use this at any given time. Probably I should push this
-        # into some queue in a different thread.
-        graph.save('no comment')
+    if request.form:
+        print(request.form)
         return flask.redirect('/view')
-    return flask.render_template('edit.html', form=form)
+    else:
+        graph = flask_app.config[constants.GRAPH]
+        people = sorted(graph.list_people())
+        tags = {
+            person: graph.list_person_tags(person)
+            for person in people
+        }
+        links = {
+            from_person: {
+                to_person: graph.list_links_between(from_person, to_person)
+                for to_person in people
+            }
+            for from_person in people
+        }
+        return flask.render_template(
+            'edit.html',
+            people_list=people,
+            tag_map=tags,
+            link_map=links)
 
 
 @flask_app.route('/view')

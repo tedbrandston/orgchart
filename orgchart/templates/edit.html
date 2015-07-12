@@ -1,19 +1,266 @@
 ﻿<html>
-  <head>
-    <title>Edit the orgchart</title>
-  </head>
-  <body>
-    <!-- Ideally, I'd have some kind of pretty, dynamic form here, but until then... -->
-    <h1>Make all of the following changes:</h1>
-    <form action="" method="post" name="add_person">
-      {{ form.hidden_tag() }}
-      <p>Add a person named: {{ form.add_person() }}</p>
-      <p>Remove a person: {{ form.delete_person() }}</p>
-      <p>Add the tag {{ form.add_tag }} to {{ form.person_to_tag() }}</p>
-      <p>Remove the tag {{ form.remove_tag }} from {{ form.person_to_untag() }}</p>
-      <p>Add a relationship: {{ form.add_link_from }} ---{{ form.add_link() }}--> {{ form.add_link_to }}</p>
-      <p>Remove a relationship: {{ form.del_link_from }} ---{{ form.del_link() }}--> {{ form.del_link_to }}</p>
-      <p><input type="submit" value="Apply changes"></p>
-    </form>
-  </body>
+    <head>
+        <title>Edit the orgchart</title>
+    </head>
+    <body>
+        <h1>Make the following changes:</h1>
+        <form action="" method="post" id="changes">
+            <input type="submit" id="submit" value="Apply changes">
+        </form>
+        <select id="action_selector">
+            <option value="no_selection" selected="selected">Select an action...</option>
+            <option value="add_person">Create Person</option>
+            <option value="del_person">Remove Person</option>
+            <option value="tag_person">Tag Person</option>
+            <option value="untag_person">Remove Tag from Person</option>
+            <option value="link_people">Link People</option>
+            <option value="unlink_people">Remove Link between People</option>
+        </select>
+        <button type="button" id="add_action">+</button>
+
+        <script>
+            "use strict";
+
+            var addAction = document.getElementById('add_action');
+            var actionSelector = document.getElementById('action_selector');
+            var changes = document.getElementById('changes');
+            var submitBtn = document.getElementById('submit');
+            var numChanges = 0;
+
+            submitBtn.style.visibility = "hidden";
+
+            {% autoescape false %}
+            var listOfPeople = [
+                {% for p in people_list %}"{{p}}",{% endfor %}
+            ];
+            var mapOfTags = {
+                {%- for p in people_list %}
+                {{p}}: [{% for t in tag_map[p] %}"{{t}}", {% endfor %}],
+                {%- endfor %}
+            };
+            var mapOfLinks = {
+                {%- for p in people_list %}
+                {{p}}: {
+                    {%- for q in people_list %}
+                    {{q}}: [{% for l in link_map[p][q] %}"{{l}}", {% endfor %}],
+                    {%- endfor %}
+                },
+                {%- endfor %}
+            };
+            {% endautoescape %}
+
+            function addToChanges(elem) {
+                changes.insertBefore(elem, submitBtn);
+                submitBtn.style.visibility = "visible";
+            }
+
+            function createSelect(id, options, default_text) {
+                var select = document.createElement('select');
+                select.id = id;
+
+                var defaultOption = document.createElement('option');
+                defaultOption.value = 'no_selection';
+                defaultOption.text = default_text;
+                select.appendChild(defaultOption);
+
+                for(var i = 0; i < options.length; i++) {
+                    var option = document.createElement('option');
+                    option.value = options[i];
+                    option.text = options[i];
+                    select.appendChild(option);
+                }
+
+                return select;
+            }
+
+            var selectPersonDefaultText = "Select a person...";
+
+            addAction.addEventListener('click', function() {
+                var act = actionSelector.options[actionSelector.selectedIndex].value;
+
+                numChanges += 1;
+                if(act === "no_selection") {
+                    // Nothing selected
+                } else if(act == "add_person") {
+                    // Should look like
+                    // Add person named: [           ]
+                    var p = document.createElement('p');
+                    var span = document.createElement('span');
+                    span.textContent = 'Add person named: ';
+                    var input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = 'add_person' + numChanges;
+                    p.appendChild(span);
+                    p.appendChild(input);
+                    addToChanges(p);
+                } else if(act == "del_person") {
+                    // Should look like
+                    // Remove: [ Select person... v]
+                    var p = document.createElement('p');
+                    var span = document.createElement('span');
+                    span.textContent = 'Remove: ';
+                    p.appendChild(span);
+                    p.appendChild(createSelect(
+                        'remove_person' + numChanges,
+                        listOfPeople,
+                        selectPersonDefaultText));
+                    addToChanges(p);
+                } else if(act == "tag_person") {
+                    // Should look like
+                    // Tag [ Select person... v] with: [            ]
+                    var p = document.createElement('p');
+                    var span = document.createElement('span');
+                    span.textContent = 'Tag ';
+                    var select = createSelect(
+                        'select_person' + numChanges,
+                        listOfPeople,
+                        selectPersonDefaultText);
+                    var span2 = document.createElement('span');
+                    span2.textContent = ' with: ';
+                    var input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = 'tag_person' + numChanges;
+                    p.appendChild(span);
+                    p.appendChild(select);
+                    p.appendChild(span2);
+                    p.appendChild(input);
+                    addToChanges(p);
+                } else if(act == "untag_person") {
+                    // Should look like
+                    // Remove from [ Select person... v] the tag: [ Select tag... v]
+                    var p = document.createElement('p');
+                    var span = document.createElement('span');
+                    span.textContent = 'Remove from ';
+                    var personSelect = createSelect(
+                        'select_person' + numChanges,
+                        listOfPeople,
+                        selectPersonDefaultText);
+                    var span2 = document.createElement('span');
+                    span2.textContent = ' the tag: ';
+                    var tagSelect = createSelect(
+                        'remove_tag' + numChanges,
+                        [],
+                        'Select tag...');
+                    p.appendChild(span);
+                    p.appendChild(personSelect);
+                    p.appendChild(span2);
+                    p.appendChild(tagSelect);
+                    addToChanges(p);
+
+                    personSelect.addEventListener('change', function() {
+                        var person = personSelect.options[personSelect.selectedIndex].value;
+                        var personMap = mapOfTags[person];
+                        tagSelect.options.length = 0;
+                        tagSelect.options[0] = new Option('Select tag...', 'no_selection', 'selected');
+                        for(var i = 0; i < personMap.length; i++) {
+                            tagSelect.options[tagSelect.options.length] = new Option(personMap[i], personMap[i]);
+                        }
+                    });
+                } else if(act == "link_people") {
+                    // Should look like
+                    // Add link between [ Select person... v] and [ Select person... v]: [           ]
+                    var p = document.createElement('p');
+                    var span = document.createElement('span');
+                    span.textContent = 'Add link between ';
+                    var fromPersonSelect = createSelect(
+                        'link_from_person' + numChanges,
+                        listOfPeople,
+                        selectPersonDefaultText);
+                    var span2 = document.createElement('span');
+                    span2.textContent = ' and ';
+                    var toPersonSelect = createSelect(
+                        'link_to_person' + numChanges,
+                        listOfPeople,
+                        selectPersonDefaultText);
+                    var span3 = document.createElement('span');
+                    span3.textContent = ': ';
+                    var link = document.createElement('input')
+                    link.type = 'text';
+                    link.name = 'add_link' + numChanges;
+                    p.appendChild(span);
+                    p.appendChild(fromPersonSelect);
+                    p.appendChild(span2);
+                    p.appendChild(toPersonSelect);
+                    p.appendChild(span3);
+                    p.appendChild(link);
+                    addToChanges(p);
+                } else if(act == "unlink_people") {
+                    // Should look like
+                    // Remove link between [ Select person... v] and [ Select person... v]: [ Select link... v]
+                    var p = document.createElement('p');
+                    var span = document.createElement('span');
+                    span.textContent = 'Remove link between ';
+                    var fromPersonSelect = createSelect(
+                        'link_from_person' + numChanges,
+                        listOfPeople,
+                        selectPersonDefaultText);
+                    var span2 = document.createElement('span');
+                    span2.textContent = ' and ';
+                    var toPersonSelect = createSelect(
+                        'link_to_person' + numChanges,
+                        listOfPeople,
+                        selectPersonDefaultText);
+                    var span3 = document.createElement('span');
+                    span3.textContent = ': ';
+                    var linkSelect = createSelect(
+                        'remove_link' + numChanges,
+                        [],
+                        'Select link...');
+                    p.appendChild(span);
+                    p.appendChild(fromPersonSelect);
+                    p.appendChild(span2);
+                    p.appendChild(toPersonSelect);
+                    p.appendChild(span3);
+                    p.appendChild(linkSelect);
+                    addToChanges(p);
+
+                    // strict mode disallows functions in if statements,
+                    // so this function has to be duplicated
+                    fromPersonSelect.addEventListener('change', function() {
+                        var fromPerson = fromPersonSelect.options[fromPersonSelect.selectedIndex].value;
+                        var toPerson = toPersonSelect.options[toPersonSelect.selectedIndex].value;
+
+                        if(fromPerson === 'no_selection' || toPerson === 'no_selection') {
+                            return;
+                        }
+
+                        var links = mapOfLinks[fromPerson][toPerson];
+
+                        linkSelect.options.length = 0;
+                        if(links.length > 0) {
+                            linkSelect.options[0] = new Option('Select link...', 'no_selection', 'selected');
+                            for(var i = 0; i < links.length; i++) {
+                                linkSelect.options[linkSelect.options.length] = new Option(links[i], links[i]);
+                            }
+                        } else {
+                            linkSelect.options[0] = new Option('No links', 'no_selection', 'selected');
+                        }
+                    });
+                    toPersonSelect.addEventListener('change', function() {
+                        var fromPerson = fromPersonSelect.options[fromPersonSelect.selectedIndex].value;
+                        var toPerson = toPersonSelect.options[toPersonSelect.selectedIndex].value;
+
+                        if(fromPerson === 'no_selection' || toPerson === 'no_selection') {
+                            return;
+                        }
+
+                        var links = mapOfLinks[fromPerson][toPerson];
+
+                        linkSelect.options.length = 0;
+                        if(links.length > 0) {
+                            linkSelect.options[0] = new Option('Select link...', 'no_selection', 'selected');
+                            for(var i = 0; i < links.length; i++) {
+                                linkSelect.options[linkSelect.options.length] = new Option(links[i], links[i]);
+                            }
+                        } else {
+                            linkSelect.options[0] = new Option('No links', 'no_selection', 'selected');
+                        }
+                    });
+                } else {
+                    console.log('No case for handling' + act);
+                    window.alert('Programmer error.');
+                }
+            });
+        </script>
+    </body>
 </html>
